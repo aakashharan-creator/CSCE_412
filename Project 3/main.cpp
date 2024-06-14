@@ -25,8 +25,8 @@ Request getRandomRequest()
     string ipIn = getRandomIP();
     string ipOut = getRandomIP();
     
-    int time = rand() % 10 + 1;
-    // int time = 2;
+    // int time = rand() % 10 + 1;
+    int time = 2;
 
     return Request(ipIn, ipOut, time);
 }
@@ -58,7 +58,6 @@ int main()
 
     int num_requests = num_servers * 100;
 
-    // for (int i = 1; i <= num_requests; i++)
     for (int i = 1; i <= num_servers * 101; i++)
         loadbalancer.addRequest(getRandomRequest());
 

@@ -1,6 +1,9 @@
 #include "loadbalancer.h"
 #include <unistd.h>
 #include <thread>
+#include <vector>
+
+using namespace std;
 
 void LoadBalancer::addRequest(Request req)
 {
@@ -28,86 +31,37 @@ LoadBalancer::LoadBalancer(int num_servers)
 
 void LoadBalancer::handleAllRequests()
 {
+    vector<int> servers_for_thresholds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    vector<float> thresholds = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
+    
     while (1)
     {
         while (req_queue->hasNext())
         {
-            if (req_queue->currThreshold() >= 0.75)
-            {
-                int num_servers = servers.size();
+            int curr = 0;
+            int num_servers = servers.size();
+            float occupancy = req_queue->currThreshold();
 
-                if (num_servers < 8)
-                {
-                    cout << "Entering > 0.75 threshold, scaling to 8 servers." << endl;
-                    for (int i = num_servers; i < 8; i++)
-                        servers.push_back(new WebServer(i));
+            while (thresholds[curr] < occupancy){
+                curr++;
+            }
+
+            if (num_servers < servers_for_thresholds[curr])
+            {
+                cout << "entered " << thresholds[curr] << " threshold, scaling up to " << servers_for_thresholds[curr] << " servers." << endl;
+                for (int i = num_servers; i < servers_for_thresholds[curr]; i++)
+                    servers.push_back(new WebServer(i));
+            }
+            else if (num_servers > servers_for_thresholds[curr])
+            {
+                cout << "entered " << thresholds[curr] << " threshold, scaling down to " << servers_for_thresholds[curr] << " servers." << endl;
+                for (int s = num_servers; s > servers_for_thresholds[curr]; s--) {
+                    while (!servers[s - 1]->isReady()) {}
+                    servers.pop_back();
                 }
             }
 
-            if (req_queue->currThreshold() >= 0.5 && req_queue->currThreshold() < 0.75)
-            {
-                int num_servers = servers.size();
-
-                if (num_servers > 6)
-                {
-                    cout << "going down to 0.5 < x < 0.75 threshold, scaling to 6 servers" << endl;
-                    for (int s = num_servers - 1; s > 5; s--)
-                    {
-                        while (!servers[s]->isReady()){}
-                        servers.pop_back();
-                    }
-                }
-                else if (num_servers < 6)
-                {
-                    cout << "going up to 0.5 < x 0.75 thresohld, scaling to 6 servers" << endl;
-                    for (int i = num_servers; i < 6; i++)
-                        servers.push_back(new WebServer(i));
-                }
-            }
-
-            if (req_queue->currThreshold() < 0.5 && req_queue->currThreshold() >= 0.25)
-            {
-                int num_servers = servers.size();
-
-                if (num_servers > 4)
-                {
-                    cout << "going down to x < 0.5 threshold, scaling to 4 servers" << endl;
-                    for (int s = num_servers - 1; s > 3; s--)
-                    {
-                        while (!servers[s]->isReady()){}
-                        servers.pop_back();
-                    }
-                }
-                else if (num_servers < 4)
-                {
-                    cout << "going up to x < 0.5 thresohld, scaling to 4 servers" << endl;
-                    for (int i = num_servers; i < 4; i++)
-                        servers.push_back(new WebServer(i));
-                }
-            }
-            if (req_queue->currThreshold() < 0.25)
-            {
-                int num_servers = servers.size();
-
-                if (num_servers > 2)
-                {
-                    cout << "going down to x < 0.25 threshold, scaling to 2 servers" << endl;
-                    for (int s = num_servers - 1; s > 1; s--)
-                    {
-                        while (!servers[s]->isReady()){}
-                        servers.pop_back();
-                    }
-                }
-                else if (num_servers < 2)
-                {
-                    cout << "going up to x < 0.25 thresohld, scaling to 2 servers" << endl;
-                    for (int i = num_servers; i < 2; i++)
-                        servers.push_back(new WebServer(i));
-                }
-            }
             handleNextRequest();
-
-            cout << "CURR OCCUPANCY: " << req_queue->currThreshold() << endl;
         }
         cout << "REQUEST QUEUE EMPTY" << endl;
         this_thread::sleep_for(1s);
