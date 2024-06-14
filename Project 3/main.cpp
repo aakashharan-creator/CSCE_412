@@ -26,6 +26,7 @@ Request getRandomRequest()
     string ipOut = getRandomIP();
     
     int time = rand() % 10 + 1;
+    // int time = 2;
 
     return Request(ipIn, ipOut, time);
 }
@@ -33,8 +34,10 @@ Request getRandomRequest()
 void addRandomRequests(LoadBalancer& loadbalancer) {
     while (1) {
         Request to_add = getRandomRequest();
+
+        // sleep(rand() % 2 + 1);
+        sleep(1);
         loadbalancer.addRequest(to_add);
-        sleep(rand() % 15 + 1);
         cout << "added a new request" << endl;
     }
 }
@@ -55,14 +58,25 @@ int main()
 
     int num_requests = num_servers * 100;
 
-    for (int i = 1; i <= num_requests; i++)
+    // for (int i = 1; i <= num_requests; i++)
+    for (int i = 1; i <= num_servers * 101; i++)
         loadbalancer.addRequest(getRandomRequest());
 
     auto t = thread(addRandomRequests, ref(loadbalancer));
-
     loadbalancer.handleAllRequests();
 
     t.join();
 
     return 0;
 }
+
+/*
+log details:
+
+starting time 
+ending time
+how many servers, any threshold crossing
+queue size
+which server handling which request
+whether a request is discarded
+*/

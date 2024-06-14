@@ -14,7 +14,7 @@ using namespace std;
 class LoadBalancer {
     private:
         vector<WebServer*> servers;
-        RequestQueue req_queue;
+        RequestQueue* req_queue;
         int MAX_SERVERS;
 
     public:
@@ -23,6 +23,7 @@ class LoadBalancer {
         void handleNextRequest();
         void addRequest(Request req);
         void handleAllRequests();
+        LoadBalancer(){};
         LoadBalancer(int num_servers);
         ~LoadBalancer();
         int getNextFree();
