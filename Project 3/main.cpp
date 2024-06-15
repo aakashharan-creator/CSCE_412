@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * @brief Defines the driver program to run the load balancer project
+ */
+
 #include "loadbalancer.h"
 #include "request.h"
 #include "requestqueue.h"
@@ -8,11 +13,15 @@
 
 using namespace std;
 
-// getRandomIP is an AI generated function
+/**
+ * Generates a random IP address.
+ * 
+ * @return A string representing a random IP address.
+ */
+
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
-
 string getRandomIP()
 {
     stringstream ip;
@@ -20,45 +29,59 @@ string getRandomIP()
     return ip.str();
 }
 
+/**
+ * Generates a random request.
+ * 
+ * @return A Request object with random IP addresses and time.
+ */
 Request getRandomRequest()
 {
     string ipIn = getRandomIP();
     string ipOut = getRandomIP();
     
-    // int time = rand() % 10 + 1;
-    int time = 2;
+    int time = rand() % 20 + 1;
 
     return Request(ipIn, ipOut, time);
 }
 
+/**
+ * Adds random requests to the load balancer indefinitely.
+ * 
+ * @param loadbalancer The LoadBalancer object to add requests to.
+ */
 void addRandomRequests(LoadBalancer& loadbalancer) {
     while (1) {
         Request to_add = getRandomRequest();
 
-        // sleep(rand() % 2 + 1);
-        sleep(1);
+        sleep(rand() % 2 + 1);
+
         loadbalancer.addRequest(to_add);
-        cout << "added a new request" << endl;
+        cout << "A new request has been added." << endl;
     }
 }
 
+/**
+ * The main function of the program.
+ * 
+ * @return 0 on successful execution.
+ */
 int main()
 {
     int num_servers = 0;
     int time_to_run = 0;
 
-    cout << "enter number of servers: ";
+    cout << "Enter number of servers: ";
     cin >> num_servers;
-    cout << "\nenter time to run: ";
+    cout << "\nEnter time in seconds to run: ";
     cin >> time_to_run;
 
-    srand(time(0)); // Seed the random number generator with current time
+    srand(time(0));
 
     LoadBalancer loadbalancer(num_servers);
 
     int num_requests = num_servers * 100;
 
-    for (int i = 1; i <= num_servers * 101; i++)
+    for (int i = 1; i <= num_servers; i++)
         loadbalancer.addRequest(getRandomRequest());
 
     auto t = thread(addRandomRequests, ref(loadbalancer));
@@ -68,14 +91,3 @@ int main()
 
     return 0;
 }
-
-/*
-log details:
-
-starting time 
-ending time
-how many servers, any threshold crossing
-queue size
-which server handling which request
-whether a request is discarded
-*/
