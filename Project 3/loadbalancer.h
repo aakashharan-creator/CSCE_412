@@ -55,6 +55,7 @@ class LoadBalancer {
          * @param num_servers The number of servers to be added to the load balancer.
          */
         LoadBalancer(int num_servers);
+        void scale();
 
         /**
          * @brief Destructor for the LoadBalancer class.

@@ -13,6 +13,7 @@
 
 using namespace std;
 
+
 /**
  * Generates a random IP address.
  * 
@@ -39,7 +40,7 @@ Request getRandomRequest()
     string ipIn = getRandomIP();
     string ipOut = getRandomIP();
     
-    int time = rand() % 20 + 1;
+    int time = rand() % 2 + 4;
 
     return Request(ipIn, ipOut, time);
 }
@@ -53,7 +54,9 @@ void addRandomRequests(LoadBalancer& loadbalancer) {
     while (1) {
         Request to_add = getRandomRequest();
 
-        sleep(rand() % 2 + 1);
+        // sleep(rand() % 5 + 1);
+        sleep(15);
+        // sleep(1);
 
         loadbalancer.addRequest(to_add);
         cout << "A new request has been added." << endl;
@@ -67,21 +70,21 @@ void addRandomRequests(LoadBalancer& loadbalancer) {
  */
 int main()
 {
-    int num_servers = 0;
-    int time_to_run = 0;
+    int num_servers = 5;
+    // int time_to_run = 0;
 
-    cout << "Enter number of servers: ";
-    cin >> num_servers;
-    cout << "\nEnter time in seconds to run: ";
-    cin >> time_to_run;
+    // cout << "Enter number of servers: ";
+    // cin >> num_servers;
+    // cout << "\nEnter time in seconds to run: ";
+    // cin >> time_to_run;
 
     srand(time(0));
 
     LoadBalancer loadbalancer(num_servers);
 
-    int num_requests = num_servers * 100;
+    int num_requests = num_servers * 95;
 
-    for (int i = 1; i <= num_servers; i++)
+    for (int i = 1; i <= num_requests; i++)
         loadbalancer.addRequest(getRandomRequest());
 
     auto t = thread(addRandomRequests, ref(loadbalancer));
